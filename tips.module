@@ -1,0 +1,289 @@
+<?php
+
+/**
+ * @file
+ * tips.module
+ *
+ * TIPS is a library agnostic tooltip management framework.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function tips_menu() {
+  // Selectors.
+  $items['admin/config/user-interface/tips'] = array(
+    'title' => 'TIPS',
+    'description' => 'Control TIP collections.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tips_settings_form'),
+    'access arguments' => array('administer tips settings'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/tips.admin.inc',
+  );
+  $items['admin/config/user-interface/tips/%/delete'] = array(
+    'title' => 'Delete selector',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tips_delete_selector_form', 4),
+    'access arguments' => array('administer tips settings'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/tips.admin.inc',
+  );
+
+  // Settings groups.
+  $items['admin/config/user-interface/tips/settings/add/%'] = array(
+    'title' => 'Add settings group',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tips_add_settings_group_form', 6),
+    'access arguments' => array('administer tips settings'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/tips.admin.inc',
+  );
+  $items['admin/config/user-interface/tips/settings/%/edit'] = array(
+    'title' => 'Edit settings group',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tips_form_settings_form', 5),
+    'access arguments' => array('administer tips settings'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/tips.admin.inc',
+  );
+  $items['admin/config/user-interface/tips/settings/%/delete'] = array(
+    'title' => 'Delete settings group',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tips_delete_settings_group_form', 5),
+    'access arguments' => array('administer tips settings'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/tips.admin.inc',
+  );
+
+  // Content groups.
+  $items['admin/config/user-interface/tips/content/add'] = array(
+    'title' => 'Add content group',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tips_form_content_form'),
+    'access arguments' => array('administer tips settings'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/tips.admin.inc',
+  );
+  $items['admin/config/user-interface/tips/content/%/edit'] = array(
+    'title' => 'Edit content group',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tips_form_content_form', 5),
+    'access arguments' => array('administer tips settings'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/tips.admin.inc',
+  );
+  $items['admin/config/user-interface/tips/content/%/delete'] = array(
+    'title' => 'Delete content group',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tips_delete_content_group_form', 5),
+    'access arguments' => array('administer tips settings'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/tips.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function tips_permission() {
+  // @todo, Break up permissions into each group, selectors, settings, content.
+  return array(
+    'administer tips settings' => array(
+      'title' => t('Administer TIPS settings'),
+      'description' => t('Perform administration tasks for TIPS.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function tips_theme() {
+  return array(
+    'tips_admin_settings_form' => array(
+      'render element' => 'form',
+    ),
+    'tips_admin_settings_form_fields' => array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Define TIPS module(s) & their associated libraries.
+ */
+function tips_info($name = NULL) {
+  $tips = &drupal_static(__FUNCTION__);
+
+  if (!isset($tips)) {
+    foreach (module_implements('tips_info') as $module) {
+      foreach (module_invoke($module, 'tips_info') as $machine_name => $properties) {
+        // @todo, Attach more information.
+        $properties['module'] = $module;
+        $tips[$machine_name] = $properties;
+      }
+    }
+  }
+
+  // @todo, Catch for things we can't find?
+  drupal_alter('tips_info', $tips);
+
+  // If TIP name is passed.
+  if (isset($tips[$name])) {
+    return $tips[$name];
+  }
+
+  return $tips;
+}
+
+/**
+ * Load a tooltip library & default settings.
+ *
+ * Called for each tips library enabled. Each settings group is bundled with
+ * the associated library. @see tips_add.
+ */
+function tips_load_library($settings) {
+  module_load_include('inc', 'tips', 'includes/tips.database');
+
+  // @todo, Attempt to load tip library from cache.
+  if (is_numeric($settings)) {
+    $settings = tips_load_settings($settings);
+    $library = isset($settings['library']) ? $settings['library'] : '';
+  }
+  else {
+    $library = $settings['library'];
+  }
+
+  // Can haz info?
+  $tips = tips_info($library);
+
+  // Associate tip_id with settings group.
+  $tips['id'] = $settings['tip_id'];
+
+  // If settings are passed we override defaults.
+  if (!empty($settings['settings'])) {
+    $tips['settings'] = $settings['settings'];
+  }
+
+  return $tips;
+}
+
+/**
+ * Add a tooltip.
+ *
+ * @param $selector
+ *  String HTML selector, normally #id.
+ *
+ * @param $settings
+ *  Array of settings to be associated or id of
+ *  settings to load.
+ *  array(
+ *    'library' => '',
+ *    'settings' => array(),
+ *  );
+ *
+ * @param $content
+ *  Raw markup or content_id.
+ */
+function tips_add($selector, $settings, $content) {
+  // Load required prerequisite library & settings.
+  $settings = tips_load_library($settings);
+
+  if (isset($settings['library'])) {
+    drupal_add_library($settings['module'], $settings['library']);
+
+    // Build tooltip content & pass as either
+    // a parameter or option.
+    tips_build($settings, $content);
+
+    // Correct settings variable type.
+    tips_force_type_cast($settings['settings']);
+
+    // Alter settings before display.
+    drupal_alter('tips_settings', $settings);
+
+    // Group tooltip settings by selector.
+    drupal_add_js(array(
+      'tips' => array(
+        $selector => array(
+          $settings,
+        ),
+      ),
+    ), 'setting');
+    drupal_add_js(drupal_get_path('module', 'tips') . '/js/tips.settings.js', array('scope' => 'footer'));
+  }
+}
+
+/**
+ * Build tooltip content.
+ *
+ * @todo, Move content location logic to here from tips_add.
+ */
+function tips_build(&$settings, $content) {
+  if (is_numeric($content)) {
+    module_load_include('inc', 'tips', 'includes/tips.database');
+    $content = tips_load_content($content);
+  }
+
+  // Alter settings before display.
+  drupal_alter('tips_content', $content, $settings['id']);
+
+  if (isset($settings['content_option'])) {
+    // Pass content as an attribute.
+    $settings['settings']{$settings['content_option']} = $content;
+  }
+  else {
+    // Or we pass content as a param.
+    $settings['content_param'] = $content;
+  }
+}
+
+/**
+ * Implements hook_page_build().
+ *
+ * @todo, Provide context for when appropriate to
+ * include tooltips.
+ */
+function tips_page_build(&$page) {
+  module_load_include('inc', 'tips', 'includes/tips.database');
+  // @todo, Context?
+  $tooltips = tips_load_all();
+
+  if ($tooltips) {
+    foreach ($tooltips as $tooltip) {
+      tips_add($tooltip->selector, $tooltip->settings_id, $tooltip->content_id);
+    }
+  }
+}
+
+/**
+ * Required before tooltip settings are passed, force type cast.
+ */
+function tips_force_type_cast(&$settings) {
+  foreach ($settings as $name => $setting) {
+    $type = explode('::', $setting);
+
+    if (isset($type[1])) {
+      switch ($type[1]) {
+        case 'int':
+          $settings[$name] = (int)$type[0];
+        break;
+        case 'boolean':
+          $settings[$name] = (boolean)$type[0];
+        break;
+        default:
+          $settings[$name] = (string)$type[0];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function tips_flush_caches() {
+  return array('cache_tips');
+}
