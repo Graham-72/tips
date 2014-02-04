@@ -13,11 +13,11 @@
 function tips_menu() {
   // Selectors.
   $items['admin/config/user-interface/tips'] = array(
-    'title' => 'TIPS',
+    'title' => 'Tips',
     'description' => 'Control TIP collections.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tips_settings_form'),
-    'access arguments' => array('administer tips settings'),
+    'access arguments' => array('administer tips'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
@@ -25,7 +25,7 @@ function tips_menu() {
     'title' => 'Delete selector',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tips_delete_selector_form', 4),
-    'access arguments' => array('administer tips settings'),
+    'access arguments' => array('administer tips'),
     'type' => MENU_CALLBACK,
     'file' => 'includes/tips.admin.inc',
   );
@@ -61,7 +61,7 @@ function tips_menu() {
     'title' => 'Add content group',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tips_form_content_form'),
-    'access arguments' => array('administer tips settings'),
+    'access arguments' => array('administer tips content'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
@@ -69,7 +69,7 @@ function tips_menu() {
     'title' => 'Edit content group',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tips_form_content_form', 5),
-    'access arguments' => array('administer tips settings'),
+    'access arguments' => array('administer tips content'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
@@ -77,7 +77,7 @@ function tips_menu() {
     'title' => 'Delete content group',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tips_delete_content_group_form', 5),
-    'access arguments' => array('administer tips settings'),
+    'access arguments' => array('administer tips content'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
@@ -89,11 +89,18 @@ function tips_menu() {
  * Implements hook_permission().
  */
 function tips_permission() {
-  // @todo, Break up permissions into each group, selectors, settings, content.
   return array(
+    'administer tips' => array(
+      'title' => t('Administer Tips'),
+      'description' => t('Administration overview for tooltips.'),
+    ),
     'administer tips settings' => array(
-      'title' => t('Administer TIPS settings'),
-      'description' => t('Perform administration tasks for TIPS.'),
+      'title' => t('Administer Tips settings'),
+      'description' => t('Administrate settings for tooltips.'),
+    ),
+    'administer tips content' => array(
+      'title' => t('Administer Tips content'),
+      'description' => t('Administrate content for tooltips.'),
     ),
   );
 }
@@ -146,10 +153,10 @@ function tips_info($name = NULL) {
  * the associated library. @see tips_add.
  */
 function tips_load_library($settings) {
-  module_load_include('inc', 'tips', 'includes/tips.database');
-
   // @todo, Attempt to load tip library from cache.
   if (is_numeric($settings)) {
+    module_load_include('inc', 'tips', 'includes/tips.database');
+
     $settings = tips_load_settings($settings);
     $library = isset($settings['library']) ? $settings['library'] : '';
   }
@@ -258,7 +265,7 @@ function tips_page_build(&$page) {
     }
   }
 }
-
+ 
 /**
  * Required before tooltip settings are passed, force type cast.
  */
@@ -269,7 +276,11 @@ function tips_force_type_cast(&$settings) {
     if (isset($type[1])) {
       switch ($type[1]) {
         case 'int':
+        case 'integer':
           $settings[$name] = (int)$type[0];
+        break;
+        case 'float':
+          $settings[$name] = (float)$type[0];
         break;
         case 'boolean':
           $settings[$name] = (boolean)$type[0];
