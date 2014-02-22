@@ -322,7 +322,7 @@ function tips_token_replace($content) {
   // Testing only, the below will all change.
   // @todo, search for type & id.
   $args = arg();
-  if (is_numeric($args[1])) {
+  if (isset($args[1]) && is_numeric($args[1])) {
     $entity = entity_load_single($args[0], $args[1]);
 
     if ($entity) {
