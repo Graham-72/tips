@@ -238,13 +238,16 @@ function tips_build(&$settings, $content) {
   // Alter settings before display.
   drupal_alter('tips_content', $content, $settings['id']);
 
+  // Replace tokens.
+  $token_content = tips_token_replace($content);
+
   if (isset($settings['content_option'])) {
     // Pass content as an attribute.
-    $settings['settings']{$settings['content_option']} = $content;
+    $settings['settings']{$settings['content_option']} = $token_content;
   }
   else {
     // Or we pass content as a param.
-    $settings['content_param'] = $content;
+    $settings['content_param'] = $token_content;
   }
 }
 
@@ -288,6 +291,48 @@ function tips_force_type_cast(&$settings) {
         default:
           $settings[$name] = (string)$type[0];
       }
+    }
+  }
+}
+
+/**
+ * Implements hook_filter_info().
+ */
+function tips_filter_info() {
+  $filters['tips_tokens'] = array(
+    'title' => t('Tips tokens'),
+    'description' => t('The usage of this filter should be restricted to trusted users only as tokens with sensitive data could be exposed.'),
+    'process callback' => 'tips_token_replace',
+    'cache' => FALSE,
+  );
+
+  return $filters;
+}
+
+/**
+ * Process tokens on render.
+ *
+ * Note, we are limited to entities assigned to 
+ * the current menu item =(.
+ */
+function tips_token_replace($content) {
+  $data = array();
+  $options = array();
+
+  // Testing only, the below will all change.
+  // @todo, search for type & id.
+  $args = arg();
+  if (is_numeric($args[1])) {
+    $entity = entity_load_single($args[0], $args[1]);
+
+    if ($entity) {
+      $token_type = token_get_entity_mapping('entity', $args[0]);
+      
+      if ($entity) {
+        $data = array($token_type => $entity);
+      }
+
+      return token_replace($content, $data, $options);
     }
   }
 }

@@ -99,8 +99,9 @@ function tips_settings_form($form, $form_state) {
     '#prefix' => '<div id="tips-library-form">',
     '#suffix' => '</div>',
   );
-  
+
   $tips = tips_info();
+  $options = array();
   foreach ($tips as $tip) {
     $options['none'] = t('None');
     $options[$tip['library']] = $tip['title'];
@@ -298,33 +299,40 @@ function tips_form_setttings_form_submit($form, &$form_state) {
 }
 
 /**
- * Add new content group.
- */
-function tips_add_content_group_form($form, $form_state) {
-  $form['container'] = array(
-    '#type' => 'container',
-  );
-  $form['container']['content'] = array(
-    '#type' => 'textarea',
-    '#format' => 'full_html',
-  );
-
-  return $form;
-}
-
-/**
  * Edit TIP content group form.
  */
 function tips_form_content_form($form, $form_state) {
   module_load_include('inc', 'tips', 'includes/tips.database');
 
-  $content = tips_load_content($form_state['build_info']['args'][0]);
-  $content = isset($content) ? $content : '';
+  if (isset($form_state['build_info']['args'][0])) {
+    $content = tips_load_content($form_state['build_info']['args'][0]);
+  }
 
   $form['content'] = array(
-    '#type' => 'textarea',
-    '#default_value' => $content,
-    '#format' => 'full_html',
+    '#type' => 'text_format',
+    '#default_value' => isset($content) ? $content : '',
+    '#format' => 'tips',
+  );
+  
+  if (module_exists('token')) {
+    $form['tokens'] = array(
+      '#theme' => 'token_tree',
+      '#token_types' => array('node', 'term', 'vocabulary', 'user', 'menu-link', 'date', 'file'),
+      '#global_types' => TRUE,
+      '#click_insert' => TRUE,
+      '#suffix' => '<p><em>' . t('Please note, the token must be available on the page implementing the tooltip.') . '</em></p>',
+    );
+  }
+  else {
+    $form['tokens'] = array(
+      '#markup' => '<p>' . t('Enable the <a href="@drupal-token">Token module</a> to view the available token browser.', array('@drupal-token' => 'http://drupal.org/project/token')) . '</p>',
+    );
+  }
+  
+  // We don't want the format changed.
+  $form['#attached']['css'][] = array(
+    'data' => '.filter-wrapper {display:none;}', 
+    'type' => 'inline'
   );
 
   // Attach submit handler for all tip settings forms.
@@ -349,9 +357,10 @@ function tips_form_content_form_submit($form, &$form_state) {
   module_load_include('inc', 'tips', 'includes/tips.database');
 
   $content_id = $form_state['build_info']['args'][0];
+  isset($content_id) ? $content_id : NULL;
 
   // Save content.
-  tips_update_content($content_id, $form_state['values']['content']);
+  tips_update_content($content_id, $form_state['values']['content']['value']);
 
   // Alert user.
   drupal_set_message(t('Content has been updated.'), 'status');

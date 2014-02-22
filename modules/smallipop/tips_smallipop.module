@@ -46,8 +46,7 @@ function tips_smallipop_tips_info() {
       'popupAnimationSpeed' => 100,
     ),
     'content' => 'param',
-    'content_param' => '',
-    'content_param_first' => FALSE,
+    'content_param' => 2,
   );
 
   return $tips;
