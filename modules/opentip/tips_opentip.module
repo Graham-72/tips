@@ -44,6 +44,8 @@ function tips_opentip_tips_info() {
     'library' => 'opentip',
     'settings' => array(
       'animation' => 'fade',
+      'autoOffset' => TRUE,
+      'shadow' => TRUE,
     ),
     'content' => 'param',
     'content_param' => '',

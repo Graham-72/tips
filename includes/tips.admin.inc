@@ -62,7 +62,7 @@ function tips_settings_form($form, $form_state) {
   $form['groups']['form']['tips_form_table']['tips_new_form_fields'] = array();
   $form['groups']['form']['tips_form_table']['tips_new_form_fields']['selector'] = array(
     '#type' => 'textfield',
-    '#description' => t('Please read these instructions if unaware of how to obtain ') . l(t('HTML selector.'), 'https://drupal.org/project/get_form_id', 
+    '#description' => t('Please read these instructions if unaware of how to obtain ') . l(t('HTML selector.'), 'http://www.w3schools.com/jquery/jquery_selectors.asp', 
       array('attributes' => array('target' => '_blank'))),
   );
 
