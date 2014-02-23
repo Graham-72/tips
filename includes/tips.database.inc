@@ -40,13 +40,7 @@ function tips_load($tip_id = NULL) {
  *
  * @todo, Add title/ name; some sort of friendly identifier.
  */
-function tips_load_settings($settings_id = NULL) {
-  /*$result = db_query('SELECT tr.tip_id, ts.library, ts.settings 
-    FROM {tips_settings_registry} AS ts 
-    JOIN {tips_registry} AS tr ON ts.settings_id = tr.settings_id 
-    WHERE ts.settings_id = :settings_id', array(':settings_id' => $settings_id));
-  $settings = $result->fetchAssoc();*/
-  
+function tips_load_settings($settings_id = NULL) {  
   $result = db_query('SELECT tr.tip_id, ts.library, ts.settings 
     FROM {tips_registry} AS tr 
     JOIN {tips_settings_registry} AS ts ON tr.settings_id = ts.settings_id

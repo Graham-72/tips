@@ -128,17 +128,15 @@ function tips_info($name = NULL) {
   if (!isset($tips)) {
     foreach (module_implements('tips_info') as $module) {
       foreach (module_invoke($module, 'tips_info') as $machine_name => $properties) {
-        // @todo, Attach more information.
         $properties['module'] = $module;
         $tips[$machine_name] = $properties;
       }
     }
   }
 
-  // @todo, Catch for things we can't find?
   drupal_alter('tips_info', $tips);
 
-  // If TIP name is passed.
+  // If Tips name is passed.
   if (isset($tips[$name])) {
     return $tips[$name];
   }
@@ -153,7 +151,6 @@ function tips_info($name = NULL) {
  * the associated library. @see tips_add.
  */
 function tips_load_library($settings) {
-  // @todo, Attempt to load tip library from cache.
   if (is_numeric($settings)) {
     module_load_include('inc', 'tips', 'includes/tips.database');
 
@@ -167,11 +164,10 @@ function tips_load_library($settings) {
   // Can haz info?
   $tips = tips_info($library);
 
-  // Associate tip_id with settings group.
-  $tips['id'] = $settings['tip_id'];
-
   // If settings are passed we override defaults.
   if (!empty($settings['settings'])) {
+    // Associate tip_id with settings group.
+    $tips['id'] = $settings['tip_id'];
     $tips['settings'] = $settings['settings'];
   }
 
@@ -259,7 +255,6 @@ function tips_build(&$settings, $content) {
  */
 function tips_page_build(&$page) {
   module_load_include('inc', 'tips', 'includes/tips.database');
-  // @todo, Context?
   $tooltips = tips_load_all();
 
   if ($tooltips) {
@@ -319,8 +314,6 @@ function tips_token_replace($content) {
   $data = array();
   $options = array();
 
-  // Testing only, the below will all change.
-  // @todo, search for type & id.
   $args = arg();
   if (isset($args[1]) && is_numeric($args[1])) {
     $entity = entity_load_single($args[0], $args[1]);

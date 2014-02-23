@@ -355,9 +355,7 @@ function tips_form_content_form($form, $form_state) {
  */
 function tips_form_content_form_submit($form, &$form_state) {
   module_load_include('inc', 'tips', 'includes/tips.database');
-
-  $content_id = $form_state['build_info']['args'][0];
-  isset($content_id) ? $content_id : NULL;
+  $content_id = isset($form_state['build_info']['args'][0]) ? $form_state['build_info']['args'][0] : NULL;
 
   // Save content.
   tips_update_content($content_id, $form_state['values']['content']['value']);
