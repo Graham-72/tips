@@ -101,6 +101,7 @@ function tips_add_tooltip_group($values) {
   $result = db_insert('tips_registry')
     ->fields(array(
       'selector' => $values['selector'],
+      'pages' => $values['pages'],
       'settings_id' => $values['settings_id'],
       'content_id' => $values['content_id'],
     )

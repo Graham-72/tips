@@ -179,7 +179,8 @@ function tips_load_library($settings) {
  *
  * @param $selector
  *  String HTML selector, normally #id.
- *
+ * @param $pages
+ *  The pages to add this tip to
  * @param $settings
  *  Array of settings to be associated or id of
  *  settings to load.
@@ -191,7 +192,16 @@ function tips_load_library($settings) {
  * @param $content
  *  Raw markup or content_id.
  */
-function tips_add($selector, $settings, $content) {
+function tips_add($selector, $pages, $settings, $content) {
+  $pages = preg_replace('/[, ]/', "\n", $pages);
+  if ($pages) {
+    $path = current_path();
+    $path_alias = drupal_get_path_alias($path);
+    if (!drupal_match_path($path, $pages) && !drupal_match_path($path_alias, $pages)) {
+      return;
+    }
+  }
+
   // Load required prerequisite library & settings.
   $settings = tips_load_library($settings);
 
@@ -216,7 +226,8 @@ function tips_add($selector, $settings, $content) {
         ),
       ),
     ), 'setting');
-    drupal_add_js(drupal_get_path('module', 'tips') . '/js/tips.settings.js', array('scope' => 'footer'));
+    // Specifying a scope of 'footer' has bad side-effects on some sites.
+    drupal_add_js(drupal_get_path('module', 'tips') . '/js/tips.settings.js');
   }
 }
 
@@ -259,7 +270,7 @@ function tips_page_build(&$page) {
 
   if ($tooltips) {
     foreach ($tooltips as $tooltip) {
-      tips_add($tooltip->selector, $tooltip->settings_id, $tooltip->content_id);
+      tips_add($tooltip->selector, $tooltip->pages, $tooltip->settings_id, $tooltip->content_id);
     }
   }
 }
@@ -317,17 +328,12 @@ function tips_token_replace($content) {
   $args = arg();
   if (isset($args[1]) && is_numeric($args[1])) {
     $entity = entity_load_single($args[0], $args[1]);
-
-    if ($entity) {
-      $token_type = token_get_entity_mapping('entity', $args[0]);
-      
-      if ($entity) {
-        $data = array($token_type => $entity);
-      }
-
-      return token_replace($content, $data, $options);
-    }
   }
+  if (!empty($entity)) {
+    $token_type = token_get_entity_mapping('entity', $args[0]);
+    $data = array($token_type => $entity);
+  }
+  return token_replace($content, $data, $options);
 }
 
 /**

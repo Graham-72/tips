@@ -19,6 +19,9 @@ function tips_smallipop_library() {
       TIPS_SMALLIPOP_LIBRARY_PATH . '/lib/jquery.smallipop.min.js' => array(
         'scope' => 'header',
       ),
+      TIPS_SMALLIPOP_LIBRARY_PATH . '/lib/contrib/modernizr.js' => array(
+        'scope' => 'header',
+      ),
     ),
     'css' => array(
       TIPS_SMALLIPOP_LIBRARY_PATH . '/css/jquery.smallipop.min.css' => array(

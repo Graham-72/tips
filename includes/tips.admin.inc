@@ -44,6 +44,10 @@ function tips_settings_form($form, $form_state) {
       '#type' => 'item',
       '#markup' => $result->selector,
     );
+    $form['groups']['form']['tips_form_table']['tips_form_fields'][$key]['pages'] = array(
+      '#type' => 'item',
+      '#markup' => $result->pages,
+    );
     $form['groups']['form']['tips_form_table']['tips_form_fields'][$key]['settings_id'] = array(
       '#type' => 'item',
       '#markup' => $result->settings_id,
@@ -62,10 +66,14 @@ function tips_settings_form($form, $form_state) {
   $form['groups']['form']['tips_form_table']['tips_new_form_fields'] = array();
   $form['groups']['form']['tips_form_table']['tips_new_form_fields']['selector'] = array(
     '#type' => 'textfield',
-    '#description' => t('Please read these instructions if unaware of how to obtain ') . l(t('HTML selector.'), 'http://www.w3schools.com/jquery/jquery_selectors.asp', 
+    '#description' => t('Please read these instructions if unaware of how to obtain ') . l(t('HTML selector.'), 'http://www.w3schools.com/jquery/jquery_selectors.asp',
       array('attributes' => array('target' => '_blank'))),
   );
-
+  $form['groups']['form']['tips_form_table']['tips_new_form_fields']['pages'] = array(
+    '#type' => 'textfield',
+    '#size' => 20,
+    '#description' => t('Leave blank or type a comma-separated<br/>list of paths, like <em>node/123, admin/*</em>'),
+  );
   $setting_ids = array();
   $settings = db_query('SELECT ts.settings_id FROM {tips_settings_registry} AS ts')->fetchAll();
   foreach ($settings as $setting) {
@@ -101,10 +109,14 @@ function tips_settings_form($form, $form_state) {
   );
 
   $tips = tips_info();
-  $options = array();
-  foreach ($tips as $tip) {
-    $options['none'] = t('None');
-    $options[$tip['library']] = $tip['title'];
+  $options = array('none' => t('None'));
+  if (empty($tips)) {
+    drupal_set_message(t('No Tips library plugins found. Have you enabled at least one Tips submodule?'), 'warning');
+  }
+  else {
+    foreach ($tips as $tip) {
+      $options[$tip['library']] = $tip['title'];
+    }
   }
   $form['groups']['settings']['actions']['library'] = array(
     '#type' => 'select',
@@ -526,18 +538,22 @@ function theme_tips_admin_settings_form_fields($variables) {
 function theme_tips_admin_settings_form($variables) {
   $rows = array();
   $form = $variables['form'];
-  $header = array(t('Selector'), t('Settings ID'), t('Content ID'), t('Delete'));
+  $header = array(t('Selector'), t('Pages'), t('Settings ID'), t('Content ID'), t('Delete'));
 
-  foreach (element_children($form['tips_form_fields']) as $key) {
-    $row = array();
-    $row[] = drupal_render($form['tips_form_fields'][$key]['selector']);
-    $row[] = drupal_render($form['tips_form_fields'][$key]['settings_id']);
-    $row[] = drupal_render($form['tips_form_fields'][$key]['content_id']);
-    $row[] = drupal_render($form['tips_form_fields'][$key]['delete']);
-    $rows[] = $row;
+  if (!empty($form['tips_form_fields'])) {
+    foreach (element_children($form['tips_form_fields']) as $key) {
+      $row = array();
+      $row[] = drupal_render($form['tips_form_fields'][$key]['selector']);
+      $row[] = drupal_render($form['tips_form_fields'][$key]['pages']);
+      $row[] = drupal_render($form['tips_form_fields'][$key]['settings_id']);
+      $row[] = drupal_render($form['tips_form_fields'][$key]['content_id']);
+      $row[] = drupal_render($form['tips_form_fields'][$key]['delete']);
+      $rows[] = $row;
+    }
   }
   $row = array();
   $row[] = drupal_render($form['tips_new_form_fields']['selector']);
+  $row[] = drupal_render($form['tips_new_form_fields']['pages']);
   $row[] = drupal_render($form['tips_new_form_fields']['settings_id']);
   $row[] = drupal_render($form['tips_new_form_fields']['content_id']);
   $row[] = '';

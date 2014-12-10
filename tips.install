@@ -62,6 +62,13 @@ function tips_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'pages' => array(
+        'description' => 'Activate on pages',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
       'settings_id' => array(
         'description' => 'Identifies the settings group.',
         'type' => 'int',
@@ -142,4 +149,19 @@ function tips_schema() {
   $schema['cache_tips']['description'] = 'Cache table to store TIPS.';
 
   return $schema;
+}
+
+/**
+ * Allow site-builder to specify the pages on which element selectors will be active.
+ */
+function tips_update_7001() {
+
+  db_add_field('tips_registry', 'pages', array(
+    'description' => 'Activate on pages',
+    'type' => 'varchar',
+    'length' => 256,
+    'not null' => FALSE,
+    'default' => '')
+  );
+  return t("Added 'pages' column to tips_registry table.");
 }

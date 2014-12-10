@@ -4,5 +4,8 @@ core = 7.x
 package = Tips
 
 dependencies[] = libraries
+dependencies[] = token
+; smallipop and tooltipster require versions newer than what is in D7 core
+dependencies[] = jquery_update
 
 configure = admin/config/user-interface/tips/settings
