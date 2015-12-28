@@ -5,7 +5,7 @@
  */
 
 (function($) {
-  Drupal.behaviors.tips = {
+  Backdrop.behaviors.tips = {
     attach: function(context, settings) {
       $.each(settings.tips, function(i, val) {
         $.each(settings.tips[i], function(key) {

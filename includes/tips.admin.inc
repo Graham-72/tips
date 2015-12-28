@@ -58,7 +58,7 @@ function tips_settings_form($form, $form_state) {
     );
     $form['groups']['form']['tips_form_table']['tips_form_fields'][$key]['delete'] = array(
       '#markup' => implode(", ", array(
-        l(t('delete'), "admin/config/user-interface/tips/{$result->tip_id}/delete"),
+        l(t('delete'), "admin/config/content/tips/{$result->tip_id}/delete"),
       )),
     );
   }
@@ -111,7 +111,7 @@ function tips_settings_form($form, $form_state) {
   $tips = tips_info();
   $options = array('none' => t('None'));
   if (empty($tips)) {
-    drupal_set_message(t('No Tips library plugins found. Have you enabled at least one Tips submodule?'), 'warning');
+    backdrop_set_message(t('No Tips library plugins found. Have you enabled at least one Tips submodule?'), 'warning');
   }
   else {
     foreach ($tips as $tip) {
@@ -136,7 +136,7 @@ function tips_settings_form($form, $form_state) {
   }
   $form['groups']['settings']['actions']['submit'] = array(
     '#type' => 'markup',
-    '#markup' => l(t('Add settings group'), 'admin/config/user-interface/tips/settings/add/' . $library, array('attributes' => array('class' => 'button'))),
+    '#markup' => l(t('Add settings group'), 'admin/config/content/tips/settings/add/' . $library, array('attributes' => array('class' => 'button'))),
   );
 
   $rows = array();
@@ -145,8 +145,8 @@ function tips_settings_form($form, $form_state) {
     $rows[$result->settings_id] = array(
       array('data' => $result->settings_id),
       array('data' => $result->library),
-      array('data' => l(t('edit'), "admin/config/user-interface/tips/settings/{$result->settings_id}/edit")),
-      array('data' => l(t('delete'), "admin/config/user-interface/tips/settings/{$result->settings_id}/delete")),
+      array('data' => l(t('edit'), "admin/config/content/tips/settings/{$result->settings_id}/edit")),
+      array('data' => l(t('delete'), "admin/config/content/tips/settings/{$result->settings_id}/delete")),
     );
   }
   $form['groups']['settings']['tips_form_table'] = array(
@@ -167,8 +167,8 @@ function tips_settings_form($form, $form_state) {
     $rows[$result->content_id] = array(
       array('data' => $result->content_id),
       array('data' => $result->content),
-      array('data' => l(t('edit'), "admin/config/user-interface/tips/content/{$result->content_id}/edit")),
-      array('data' => l(t('delete'), "admin/config/user-interface/tips/content/{$result->content_id}/delete")),
+      array('data' => l(t('edit'), "admin/config/content/tips/content/{$result->content_id}/edit")),
+      array('data' => l(t('delete'), "admin/config/content/tips/content/{$result->content_id}/delete")),
     );
   }
   $form['groups']['content']['tips_form_table'] = array(
@@ -183,7 +183,7 @@ function tips_settings_form($form, $form_state) {
   );
   $form['groups']['content']['actions']['submit'] = array(
     '#type' => 'markup',
-    '#markup' => l(t('Add content group'), 'admin/config/user-interface/tips/content/add', array('attributes' => array('class' => 'button'))),
+    '#markup' => l(t('Add content group'), 'admin/config/content/tips/content/add', array('attributes' => array('class' => 'button'))),
   );
 
   return $form;
@@ -194,10 +194,10 @@ function tips_settings_form($form, $form_state) {
  */
 function tips_settings_form_tooltip_callback($form, $form_state) {
   // Trigger validation message.
-  $message = drupal_set_message(t(''));
+  $message = backdrop_set_message(t(''));
 
   if (!empty($form_state['values']['tips_form_table']['tips_new_form_fields']['selector'])) {
-    $message = drupal_set_message(t('New tooltip added with @selector.', array('@selector' => $form_state['values']['tips_form_table']['tips_new_form_fields']['selector'])));
+    $message = backdrop_set_message(t('New tooltip added with @selector.', array('@selector' => $form_state['values']['tips_form_table']['tips_new_form_fields']['selector'])));
   }
 
   $commands = array();
@@ -239,7 +239,7 @@ function tips_settings_form_tooltip_submit($form, $form_state) {
  * Add new settings group form.
  */
 function tips_add_settings_group_form($form, $form_state) {
-  $form = drupal_build_form('tips_' . $form_state['build_info']['args'][0] . '_settings_form', $form_state);
+  $form = backdrop_build_form('tips_' . $form_state['build_info']['args'][0] . '_settings_form', $form_state);
   $form['#submit'][] = 'tips_add_settings_group_form_submit';
 
   $form['actions'] = array(
@@ -257,14 +257,14 @@ function tips_add_settings_group_form($form, $form_state) {
  * Submit handler for new settings group forms.
  */
 function tips_add_settings_group_form_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/user-interface/tips';
+  $form_state['redirect'] = 'admin/config/content/tips';
   $settings_id = $form_state['build_info']['args'][0];
 
   // Cleanup & save new settings instance.
   tips_form_save_instance_settings($settings_id, $form_state, 'input');
 
   // Alert user.
-  drupal_set_message(t('Settings have been saved.'), 'status');
+  backdrop_set_message(t('Settings have been saved.'), 'status');
 }
 
 /**
@@ -277,7 +277,7 @@ function tips_form_settings_form($form, $form_state) {
 
   if ($tips) {
     // Tip library form.
-    $form = drupal_build_form('tips_' . $tips['library'] . '_settings_form', $form_state);
+    $form = backdrop_build_form('tips_' . $tips['library'] . '_settings_form', $form_state);
     tips_attach_default_values($form, $tips['settings']);
 
     // Attach submit handler for all tip settings forms.
@@ -300,14 +300,14 @@ function tips_form_settings_form($form, $form_state) {
  * Submit handler for TIP settings forms.
  */
 function tips_form_setttings_form_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/user-interface/tips';
+  $form_state['redirect'] = 'admin/config/content/tips';
   $settings_id = $form_state['build_info']['args'][0];
 
   // Cleanup form attr.
   tips_form_save_instance_settings($settings_id, $form_state, 'input');
 
   // Alert user.
-  drupal_set_message(t('Settings have been updated.'), 'status');
+  backdrop_set_message(t('Settings have been updated.'), 'status');
 }
 
 /**
@@ -337,7 +337,7 @@ function tips_form_content_form($form, $form_state) {
   }
   else {
     $form['tokens'] = array(
-      '#markup' => '<p>' . t('Enable the <a href="@drupal-token">Token module</a> to view the available token browser.', array('@drupal-token' => 'http://drupal.org/project/token')) . '</p>',
+      '#markup' => '<p>' . t('Enable the <a href="@backdrop-token">Token module</a> to view the available token browser.', array('@backdrop-token' => 'http://drupal.org/project/token')) . '</p>',
     );
   }
   
@@ -373,8 +373,8 @@ function tips_form_content_form_submit($form, &$form_state) {
   tips_update_content($content_id, $form_state['values']['content']['value']);
 
   // Alert user.
-  drupal_set_message(t('Content has been updated.'), 'status');
-  $form_state['redirect'] = 'admin/config/user-interface/tips';
+  backdrop_set_message(t('Content has been updated.'), 'status');
+  $form_state['redirect'] = 'admin/config/content/tips';
 }
 
 /**
@@ -430,7 +430,7 @@ function tips_attach_default_values(&$form, $values) {
 function tips_delete_settings_group_form($form, $form_state) {
   if (is_numeric($form_state['build_info']['args'][0])) {
     return confirm_form($form, t('Are you sure you want to delete group id %id?', array(
-      '%id' => $form_state['build_info']['args'][0])), 'admin/config/user-interface/tips', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
+      '%id' => $form_state['build_info']['args'][0])), 'admin/config/content/tips', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
   }
 }
 
@@ -445,10 +445,10 @@ function tips_delete_settings_group_form_submit($form, &$form_state) {
     tips_delete_settings_group($settings_id);
     // @todo, Clear tips cache.
 
-    drupal_set_message(t('Settings group @settings_id has been deleted', array('@settings_id' => $settings_id)), 'status');
+    backdrop_set_message(t('Settings group @settings_id has been deleted', array('@settings_id' => $settings_id)), 'status');
   }
   
-  $form_state['redirect'] = 'admin/config/user-interface/tips';
+  $form_state['redirect'] = 'admin/config/content/tips';
 }
 
 /**
@@ -457,7 +457,7 @@ function tips_delete_settings_group_form_submit($form, &$form_state) {
 function tips_delete_content_group_form($form, $form_state) {
   if (is_numeric($form_state['build_info']['args'][0])) {
     return confirm_form($form, t('Are you sure you want to delete group id %id?', array(
-      '%id' => $form_state['build_info']['args'][0])), 'admin/config/user-interface/tips', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
+      '%id' => $form_state['build_info']['args'][0])), 'admin/config/content/tips', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
   }
 }
 
@@ -472,10 +472,10 @@ function tips_delete_content_group_form_submit($form, &$form_state) {
     tips_delete_content_group($content_id);
     // @todo, Clear tips cache.
 
-    drupal_set_message(t('Content group @content_id has been deleted', array('@content_id' => $content_id)), 'status');
+    backdrop_set_message(t('Content group @content_id has been deleted', array('@content_id' => $content_id)), 'status');
   }
 
-  $form_state['redirect'] = 'admin/config/user-interface/tips';
+  $form_state['redirect'] = 'admin/config/content/tips';
 }
 
 /**
@@ -484,7 +484,7 @@ function tips_delete_content_group_form_submit($form, &$form_state) {
 function tips_delete_selector_form($form, $form_state) {
   if (is_numeric($form_state['build_info']['args'][0])) {
     return confirm_form($form, t('Are you sure you want to delete group id %id?', array(
-      '%id' => $form_state['build_info']['args'][0])), 'admin/config/user-interface/tips/settings', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
+      '%id' => $form_state['build_info']['args'][0])), 'admin/config/content/tips/settings', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
   }
 }
 
@@ -499,10 +499,10 @@ function tips_delete_selector_form_submit($form, &$form_state) {
     tips_delete_selector($tip_id);
     // @todo, Clear tips cache.
 
-    drupal_set_message(t('Selector @selector has been deleted', array('@selector' => $tip_id)), 'status');
+    backdrop_set_message(t('Selector @selector has been deleted', array('@selector' => $tip_id)), 'status');
   }
 
-  $form_state['redirect'] = 'admin/config/user-interface/tips/settings';
+  $form_state['redirect'] = 'admin/config/content/tips/settings';
 }
 
 /**
@@ -515,16 +515,16 @@ function theme_tips_admin_settings_form_fields($variables) {
 
   foreach (element_children($form['tips_form_fields']) as $key) {
     $row = array();
-    $row[] = drupal_render($form['tips_form_fields'][$key]['id']);
-    $row[] = drupal_render($form['tips_form_fields'][$key]['field_name']);
-    $row[] = drupal_render($form['tips_form_fields'][$key]['body']);
-    $row[] = drupal_render($form['tips_form_fields'][$key]['operations']);
+    $row[] = backdrop_render($form['tips_form_fields'][$key]['id']);
+    $row[] = backdrop_render($form['tips_form_fields'][$key]['field_name']);
+    $row[] = backdrop_render($form['tips_form_fields'][$key]['body']);
+    $row[] = backdrop_render($form['tips_form_fields'][$key]['operations']);
     $rows[] = $row;
   }
   $row = array();
-  $row[] = drupal_render($form['tips_new_form_fields']['id']);
-  $row[] = drupal_render($form['tips_new_form_fields']['field_name']);
-  $row[] = drupal_render($form['tips_new_form_fields']['body']);
+  $row[] = backdrop_render($form['tips_new_form_fields']['id']);
+  $row[] = backdrop_render($form['tips_new_form_fields']['field_name']);
+  $row[] = backdrop_render($form['tips_new_form_fields']['body']);
   $row[] = '';
   $rows[] = $row;
 
@@ -543,19 +543,19 @@ function theme_tips_admin_settings_form($variables) {
   if (!empty($form['tips_form_fields'])) {
     foreach (element_children($form['tips_form_fields']) as $key) {
       $row = array();
-      $row[] = drupal_render($form['tips_form_fields'][$key]['selector']);
-      $row[] = drupal_render($form['tips_form_fields'][$key]['pages']);
-      $row[] = drupal_render($form['tips_form_fields'][$key]['settings_id']);
-      $row[] = drupal_render($form['tips_form_fields'][$key]['content_id']);
-      $row[] = drupal_render($form['tips_form_fields'][$key]['delete']);
+      $row[] = backdrop_render($form['tips_form_fields'][$key]['selector']);
+      $row[] = backdrop_render($form['tips_form_fields'][$key]['pages']);
+      $row[] = backdrop_render($form['tips_form_fields'][$key]['settings_id']);
+      $row[] = backdrop_render($form['tips_form_fields'][$key]['content_id']);
+      $row[] = backdrop_render($form['tips_form_fields'][$key]['delete']);
       $rows[] = $row;
     }
   }
   $row = array();
-  $row[] = drupal_render($form['tips_new_form_fields']['selector']);
-  $row[] = drupal_render($form['tips_new_form_fields']['pages']);
-  $row[] = drupal_render($form['tips_new_form_fields']['settings_id']);
-  $row[] = drupal_render($form['tips_new_form_fields']['content_id']);
+  $row[] = backdrop_render($form['tips_new_form_fields']['selector']);
+  $row[] = backdrop_render($form['tips_new_form_fields']['pages']);
+  $row[] = backdrop_render($form['tips_new_form_fields']['settings_id']);
+  $row[] = backdrop_render($form['tips_new_form_fields']['content_id']);
   $row[] = '';
   $rows[] = $row;
 

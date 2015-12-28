@@ -1,11 +1,7 @@
 name = Tips
 description = Provides a managed tooltip framework.
-core = 7.x
+backdrop = 1.x
+type = module
 package = Tips
-
 dependencies[] = libraries
-dependencies[] = token
-; smallipop and tooltipster require versions newer than what is in D7 core
-dependencies[] = jquery_update
-
-configure = admin/config/user-interface/tips/settings
+configure = admin/config/content/tips/settings

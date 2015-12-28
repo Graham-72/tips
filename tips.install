@@ -34,12 +34,12 @@ function tips_enable() {
  */
 function tips_uninstall() {
   // Common.
-  drupal_uninstall_schema('tips_registry');
-  drupal_uninstall_schema('tips_settings_registry');
-  drupal_uninstall_schema('tips_content_registry');
+  backdrop_uninstall_schema('tips_registry');
+  backdrop_uninstall_schema('tips_settings_registry');
+  backdrop_uninstall_schema('tips_content_registry');
 
   // Cache.
-  drupal_uninstall_schema('cache_tips');
+  backdrop_uninstall_schema('cache_tips');
 }
 
 /**
@@ -145,23 +145,15 @@ function tips_schema() {
   );
 
   // Cache tables, @todo, get_t for description.
-  $schema['cache_tips'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_tips'] = backdrop_get_schema_unprocessed('system', 'cache');
   $schema['cache_tips']['description'] = 'Cache table to store TIPS.';
 
   return $schema;
 }
 
 /**
- * Allow site-builder to specify the pages on which element selectors will be active.
+ * Implements hook_update_last_removed().
  */
-function tips_update_7001() {
-
-  db_add_field('tips_registry', 'pages', array(
-    'description' => 'Activate on pages',
-    'type' => 'varchar',
-    'length' => 256,
-    'not null' => FALSE,
-    'default' => '')
-  );
-  return t("Added 'pages' column to tips_registry table.");
+function tips_update_last_removed() {
+  return 7001;
 }

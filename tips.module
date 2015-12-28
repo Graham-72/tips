@@ -12,18 +12,18 @@
  */
 function tips_menu() {
   // Selectors.
-  $items['admin/config/user-interface/tips'] = array(
+  $items['admin/config/content/tips'] = array(
     'title' => 'Tips',
     'description' => 'Control TIP collections.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tips_settings_form'),
     'access arguments' => array('administer tips'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
-  $items['admin/config/user-interface/tips/%/delete'] = array(
+  $items['admin/config/content/tips/%/delete'] = array(
     'title' => 'Delete selector',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tips_delete_selector_form', 4),
     'access arguments' => array('administer tips'),
     'type' => MENU_CALLBACK,
@@ -31,25 +31,25 @@ function tips_menu() {
   );
 
   // Settings groups.
-  $items['admin/config/user-interface/tips/settings/add/%'] = array(
+  $items['admin/config/content/tips/settings/add/%'] = array(
     'title' => 'Add settings group',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tips_add_settings_group_form', 6),
     'access arguments' => array('administer tips settings'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
-  $items['admin/config/user-interface/tips/settings/%/edit'] = array(
+  $items['admin/config/content/tips/settings/%/edit'] = array(
     'title' => 'Edit settings group',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tips_form_settings_form', 5),
     'access arguments' => array('administer tips settings'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
-  $items['admin/config/user-interface/tips/settings/%/delete'] = array(
+  $items['admin/config/content/tips/settings/%/delete'] = array(
     'title' => 'Delete settings group',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tips_delete_settings_group_form', 5),
     'access arguments' => array('administer tips settings'),
     'type' => MENU_NORMAL_ITEM,
@@ -57,25 +57,25 @@ function tips_menu() {
   );
 
   // Content groups.
-  $items['admin/config/user-interface/tips/content/add'] = array(
+  $items['admin/config/content/tips/content/add'] = array(
     'title' => 'Add content group',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tips_form_content_form'),
     'access arguments' => array('administer tips content'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
-  $items['admin/config/user-interface/tips/content/%/edit'] = array(
+  $items['admin/config/content/tips/content/%/edit'] = array(
     'title' => 'Edit content group',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tips_form_content_form', 5),
     'access arguments' => array('administer tips content'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/tips.admin.inc',
   );
-  $items['admin/config/user-interface/tips/content/%/delete'] = array(
+  $items['admin/config/content/tips/content/%/delete'] = array(
     'title' => 'Delete content group',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tips_delete_content_group_form', 5),
     'access arguments' => array('administer tips content'),
     'type' => MENU_NORMAL_ITEM,
@@ -123,7 +123,7 @@ function tips_theme() {
  * Define TIPS module(s) & their associated libraries.
  */
 function tips_info($name = NULL) {
-  $tips = &drupal_static(__FUNCTION__);
+  $tips = &backdrop_static(__FUNCTION__);
 
   if (!isset($tips)) {
     foreach (module_implements('tips_info') as $module) {
@@ -134,7 +134,7 @@ function tips_info($name = NULL) {
     }
   }
 
-  drupal_alter('tips_info', $tips);
+  backdrop_alter('tips_info', $tips);
 
   // If Tips name is passed.
   if (isset($tips[$name])) {
@@ -196,8 +196,8 @@ function tips_add($selector, $pages, $settings, $content) {
   $pages = preg_replace('/[, ]/', "\n", $pages);
   if ($pages) {
     $path = current_path();
-    $path_alias = drupal_get_path_alias($path);
-    if (!drupal_match_path($path, $pages) && !drupal_match_path($path_alias, $pages)) {
+    $path_alias = backdrop_get_path_alias($path);
+    if (!backdrop_match_path($path, $pages) && !backdrop_match_path($path_alias, $pages)) {
       return;
     }
   }
@@ -206,7 +206,7 @@ function tips_add($selector, $pages, $settings, $content) {
   $settings = tips_load_library($settings);
 
   if (isset($settings['library'])) {
-    drupal_add_library($settings['module'], $settings['library']);
+    backdrop_add_library($settings['module'], $settings['library']);
 
     // Build tooltip content & pass as either
     // a parameter or option.
@@ -216,10 +216,10 @@ function tips_add($selector, $pages, $settings, $content) {
     tips_force_type_cast($settings['settings']);
 
     // Alter settings before display.
-    drupal_alter('tips_settings', $settings);
+    backdrop_alter('tips_settings', $settings);
 
     // Group tooltip settings by selector.
-    drupal_add_js(array(
+    backdrop_add_js(array(
       'tips' => array(
         $selector => array(
           $settings,
@@ -227,7 +227,7 @@ function tips_add($selector, $pages, $settings, $content) {
       ),
     ), 'setting');
     // Specifying a scope of 'footer' has bad side-effects on some sites.
-    drupal_add_js(drupal_get_path('module', 'tips') . '/js/tips.settings.js');
+    backdrop_add_js(backdrop_get_path('module', 'tips') . '/js/tips.settings.js');
   }
 }
 
@@ -243,7 +243,7 @@ function tips_build(&$settings, $content) {
   }
 
   // Alter settings before display.
-  drupal_alter('tips_content', $content, $settings['id']);
+  backdrop_alter('tips_content', $content, $settings['id']);
 
   // Replace tokens.
   $token_content = tips_token_replace($content);

@@ -1,6 +1,6 @@
 name = Example Tips
 description = Provides Tips hook examples.
-core = 7.x
+backdrop = 1.x
 package = Tips
 
 dependencies[] = tips
